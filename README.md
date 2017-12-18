@@ -3,7 +3,7 @@ This repo is modified by zhbli.
 
 ## New Features
 - Visualize the false negative bboxes.
-- Show softmax socres of every error box.
+- Show the confidence score of every error box.
 
 ## Modified files
 **lib/datasets/voc_eval.py**

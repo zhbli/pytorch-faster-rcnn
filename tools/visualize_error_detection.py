@@ -37,6 +37,7 @@ if __name__ == '__main__':
         ax.imshow(im, aspect='equal')
 
         bbox = d[i][0][3:]
+        score = d[i][2]
         ax.add_patch(
             plt.Rectangle((bbox[0], bbox[1]),
                           bbox[2] - bbox[0],
@@ -53,9 +54,9 @@ if __name__ == '__main__':
             )
 
         ax.text(bbox[0], bbox[1] - 2,
-                '{:s}'.format(d[i][0]),
+                '{:s}'.format(d[i][0]) + ' score={:f}'.format(score),
                 bbox=dict(facecolor='blue', alpha=0.5),
-                fontsize=14, color='white')
+                fontsize=10, color='white')
         plt.axis('off')
         plt.tight_layout()
         plt.draw()

@@ -208,14 +208,14 @@ def voc_eval(detpath,
 
             #zhbli(2): write false negative info
             if d < npos:
-                fp_table[fp_idx] = [[image_ids[d], classname, 'err_repeat'] + bb.tolist(), BBGT.tolist()]
+                fp_table[fp_idx] = [[image_ids[d], classname, 'err_repeat'] + bb.tolist(), BBGT.tolist(), -sorted_scores[d].tolist()]
                 fp_idx = fp_idx + 1
       else:
         fp[d] = 1.
 
         # zhbli(3): write false negative info
         if d < npos:
-            fp_table[fp_idx] = [[image_ids[d], classname, 'err_lowIoU'] + bb.tolist(), BBGT.tolist()]
+            fp_table[fp_idx] = [[image_ids[d], classname, 'err_lowIoU'] + bb.tolist(), BBGT.tolist(), -sorted_scores[d].tolist()]
             fp_idx = fp_idx + 1
 
     # zhbli(4): write false negative info
