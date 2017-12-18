@@ -1,6 +1,14 @@
 # zhbli: MOST IMPORTANT
 This repo is modified by zhbli.
 
+## New Feature
+Visualize the false negative bboxes.
+
+## Modified files
+
+## How to visualize false negatives
+
+
 # Important notice:
 If you used the master branch before Sep. 26 2017 and its corresponding pretrained model, **PLEASE PAY ATTENTION**:
 The old master branch in now under old_master, you can still run the code and download the pretrained model, but the pretrained model for that old master is not compatible to the current master!
