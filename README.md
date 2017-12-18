@@ -4,10 +4,20 @@ This repo is modified by zhbli.
 ## New Feature
 Visualize the false negative bboxes.
 
+## Added files ##
+
+**output/vgg16/voc_2007_test/?_false_positive.txt** 
+- log error detections
+- Different classes are loged in different files. 
+
+**tools/visualize_error_detection.py**  
+ - load ``output/vgg16/voc_2007_test/*_false_positive.txt``
+ - visualize it.
+
 ## Modified files
 
 ## How to visualize false negatives
-
+Run tools/visualize_error_detection.py
 
 # Important notice:
 If you used the master branch before Sep. 26 2017 and its corresponding pretrained model, **PLEASE PAY ATTENTION**:
