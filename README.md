@@ -1,19 +1,18 @@
 # zhbli: MOST IMPORTANT
 This repo is modified by zhbli.
 
-## New Feature
-Visualize the false negative bboxes.
+## New Features
+- Visualize the false negative bboxes.
+- Show softmax socres of every error box.
 
 ## Modified files
 **lib/datasets/voc_eval.py**
 - Generate ?_false_positive.txt
 
 ## Added files ##
-
-**tools/?_false_positive.txt** 
+**tools/false_detection_logs/?_false_positive.txt** 
 - log error detections
 - Different classes are loged in different files. 
-
 **tools/visualize_error_detection.py**  
  - load ``tools/*_false_positive.txt``
  - visualize it.
