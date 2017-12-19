@@ -2,17 +2,29 @@
 This repo is modified by zhbli.
 
 ## New Features
+- Save detection.pkl into tools/vgg16_voc07_test and tools/vgg16_voc07_trainval
 - Visualize the false negative bboxes.
 - Show the confidence score of every error box.
 
+## How to show error boxes in trainval dataset ?
+- Run ``experiments/scripts/eval_trainval.sh 1 pascal_voc vgg16`` to generate detections.pkl of trainval dataset.
+- The pkl file is in ``output/vgg16/voc_2007_trainval/default/vgg16_faster_rcnn_iter_70000`` (also backup in ``tools/vgg16_voc07_trainval``)
+- Run ``tools/reval.py --output_dir=output/vgg16/voc_2007_trainval/default/vgg16_faster_rcnn_iter_70000 --imdb=voc_2007_trainval`` to generate ``output/false_detection_logs/?_false_positive.txt``
+- Run ``tools/visualize_error_detection.py`` to visualize error boxes.
 ## Modified files
 **lib/datasets/voc_eval.py**
 - Generate ?_false_positive.txt
 
 ## Added files ##
+**experiments/scripts/eval_trainval.sh**
+- Get mAP of trainval dataset
+- Usage: experiments/scripts/eval_trainval.sh gpu_id dataset net
+- e.g. experiments/scripts/eval_trainval.sh 1 pascal_voc vgg16
+
 **tools/false_detection_logs/?_false_positive.txt** 
 - log error detections
 - Different classes are loged in different files. 
+
 **tools/visualize_error_detection.py**  
  - load ``tools/*_false_positive.txt``
  - visualize it.

@@ -159,7 +159,7 @@ def voc_eval(detpath,
   fp = np.zeros(nd)
 
   #zhbli(1): write false negative info
-  false_positive_file_name = 'tools/false_detection_logs/%s_false_positive.txt' % (classname)
+  false_positive_file_name = 'output/false_detection_logs/%s_false_positive.txt' % (classname)
   false_positive_file = open(false_positive_file_name, 'w')
   fp_table = [[] for i in range(npos)]
   fp_idx = 0

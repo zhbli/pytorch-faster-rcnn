@@ -22,7 +22,7 @@ import argparse
 from nets.vgg16 import vgg16
 
 if __name__ == '__main__':
-    filename = 'tools/false_detection_logs/sofa_false_positive.txt'
+    filename = 'output/false_detection_logs/sofa_false_positive.txt'
     f = open(filename, 'rb')
     d = pickle.load(f)
     f.close()
