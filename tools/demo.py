@@ -41,7 +41,7 @@ CLASSES = ('__background__',
 NETS = {'vgg16': ('vgg16_faster_rcnn_iter_%d.pth',),'res101': ('res101_faster_rcnn_iter_%d.pth',)}
 DATASETS= {'pascal_voc': ('voc_2007_trainval',),'pascal_voc_0712': ('voc_2007_trainval+voc_2012_trainval',)}
 
-def vis_detections(im, class_name, dets, thresh=0.5):
+def vis_detections(im, class_name, dets, det_inds, thresh=0.5):
     """Draw detected bounding boxes."""
     inds = np.where(dets[:, -1] >= thresh)[0]
     if len(inds) == 0:
@@ -51,6 +51,40 @@ def vis_detections(im, class_name, dets, thresh=0.5):
     fig, ax = plt.subplots(figsize=(12, 12))
     ax.imshow(im, aspect='equal')
     for i in inds:
+        bbox = dets[i, :4]
+        score = dets[i, -1]
+        det_ind = det_inds[inds[i]]
+        ax.add_patch(
+            plt.Rectangle((bbox[0], bbox[1]),
+                          bbox[2] - bbox[0],
+                          bbox[3] - bbox[1], fill=False,
+                          edgecolor='red', linewidth=3.5)
+            )
+        ax.text(bbox[0], bbox[1] - 2,
+                '{:s} {:.3f} {:d}'.format(class_name, score, det_ind),
+                bbox=dict(facecolor='blue', alpha=0.5),
+                fontsize=14, color='white')
+
+    ax.set_title(('{} detections with '
+                  'p({} | box) >= {:.1f}').format(class_name, class_name,
+                                                  thresh),
+                  fontsize=14)
+    plt.axis('off')
+    plt.tight_layout()
+    plt.draw()
+
+def vis_detections_zhbli(im, class_name, dets, thresh=0.5):
+    # Only one box per img.
+    """Draw detected bounding boxes."""
+    inds = np.where(dets[:, -1] >= thresh)[0]
+    if len(inds) == 0:
+        return
+
+    for i in inds:
+        im = im[:, :, (2, 1, 0)]
+        fig, ax = plt.subplots(figsize=(12, 12))
+        ax.imshow(im, aspect='equal')
+
         bbox = dets[i, :4]
         score = dets[i, -1]
 
@@ -64,20 +98,20 @@ def vis_detections(im, class_name, dets, thresh=0.5):
                 '{:s} {:.3f}'.format(class_name, score),
                 bbox=dict(facecolor='blue', alpha=0.5),
                 fontsize=14, color='white')
+        ax.set_title(('{} detections with '
+                      'p({} | box) >= {:.1f}').format(class_name, class_name,
+                                                      thresh),
+                     fontsize=14)
+        plt.axis('off')
+        plt.tight_layout()
+        plt.draw()
 
-    ax.set_title(('{} detections with '
-                  'p({} | box) >= {:.1f}').format(class_name, class_name,
-                                                  thresh),
-                  fontsize=14)
-    plt.axis('off')
-    plt.tight_layout()
-    plt.draw()
 
 def demo(net, image_name):
     """Detect object classes in an image using pre-computed object proposals."""
 
     # Load the demo image
-    im_file = os.path.join(cfg.DATA_DIR, 'demo', image_name)
+    im_file = os.path.join('/data/zwzhou/zhbli/pytorch-faster-rcnn/data', 'demo', image_name)
     im = cv2.imread(im_file)
 
     # Detect all object classes and regress object bounds
@@ -88,8 +122,9 @@ def demo(net, image_name):
     print('Detection took {:.3f}s for {:d} object proposals'.format(timer.total_time(), boxes.shape[0]))
 
     # Visualize detections for each class
-    CONF_THRESH = 0.8
+    CONF_THRESH = 0.521
     NMS_THRESH = 0.3
+    #NMS_THRESH = 1
     for cls_ind, cls in enumerate(CLASSES[1:]):
         cls_ind += 1 # because we skipped background
         cls_boxes = boxes[:, 4*cls_ind:4*(cls_ind + 1)]
@@ -98,7 +133,7 @@ def demo(net, image_name):
                           cls_scores[:, np.newaxis])).astype(np.float32)
         keep = nms(torch.from_numpy(dets), NMS_THRESH)
         dets = dets[keep.numpy(), :]
-        vis_detections(im, cls, dets, thresh=CONF_THRESH)
+        vis_detections(im, cls, dets, keep, thresh=CONF_THRESH)
 
 def parse_args():
     """Parse input arguments."""
@@ -143,7 +178,7 @@ if __name__ == '__main__':
 
     print('Loaded network {:s}'.format(saved_model))
 
-    im_names = ['000456.jpg', '000542.jpg', '001150.jpg',
+    im_names = ['000203.jpg', '000542.jpg', '001150.jpg',
                 '001763.jpg', '004545.jpg']
     for im_name in im_names:
         print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~')

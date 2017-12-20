@@ -29,6 +29,10 @@ This repo is modified by zhbli.
  - load ``tools/*_false_positive.txt``
  - visualize it.
 
+**tools/visualize_train.py**
+- Show detection result of every train step.
+- Not a main program, but invoked by training program.
+
 ## How to visualize false negatives
 1. (Must perform this step if any file was modified)(Omit this step if ?_false_positive.txt already exists) Run tools/test_net.py to generate detections.pkl
 2. (Must perform this step if any file was modified)(Omit this step if ?_false_positive.txt already exists) Run tools/reval.py to generate ?_false_positive.txt
