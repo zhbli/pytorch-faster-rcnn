@@ -122,7 +122,7 @@ def demo(net, image_name):
     print('Detection took {:.3f}s for {:d} object proposals'.format(timer.total_time(), boxes.shape[0]))
 
     # Visualize detections for each class
-    CONF_THRESH = 0.521
+    CONF_THRESH = 0.5
     NMS_THRESH = 0.3
     #NMS_THRESH = 1
     for cls_ind, cls in enumerate(CLASSES[1:]):
@@ -178,7 +178,7 @@ if __name__ == '__main__':
 
     print('Loaded network {:s}'.format(saved_model))
 
-    im_names = ['000203.jpg', '000542.jpg', '001150.jpg',
+    im_names = ['001588.jpg', '000542.jpg', '001150.jpg',
                 '001763.jpg', '004545.jpg']
     for im_name in im_names:
         print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~')

@@ -11,10 +11,13 @@ This repo is modified by zhbli.
 - The pkl file is in ``output/vgg16/voc_2007_trainval/default/vgg16_faster_rcnn_iter_70000`` (also backup in ``tools/vgg16_voc07_trainval``)
 - Run ``tools/reval.py --output_dir=output/vgg16/voc_2007_trainval/default/vgg16_faster_rcnn_iter_70000 --imdb=voc_2007_trainval`` to generate ``output/false_detection_logs/?_false_positive.txt``
 - Run ``tools/visualize_error_detection.py`` to visualize error boxes.
+
 ## Modified files
 **lib/datasets/voc_eval.py**
 - Generate ?_false_positive.txt
 
+**lib/layer_utils/proposal_target_layer.py**
+- Add function ``_sample_rois_zhbli(...)`` to select background rois by scores.
 ## Added files ##
 **experiments/scripts/eval_trainval.sh**
 - Get mAP of trainval dataset

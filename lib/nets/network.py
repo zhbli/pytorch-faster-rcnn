@@ -400,8 +400,8 @@ class Network(nn.Module):
       means = bbox_pred.data.new(cfg.TRAIN.BBOX_NORMALIZE_MEANS).repeat(self._num_classes).unsqueeze(0).expand_as(bbox_pred)
       self._predictions["bbox_pred"] = bbox_pred.mul(Variable(stds)).add(Variable(means))
     else:
-      input('visualize train')
-      visualize_train(bbox_pred, self._num_classes, self._predictions, self._im_info[2])
+      if cfg.visualize_train:
+        visualize_train(bbox_pred, self._num_classes, self._predictions, self._im_info[2])
       self._add_losses() # compute losses
 
   def init_weights(self):

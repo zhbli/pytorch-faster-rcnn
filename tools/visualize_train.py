@@ -64,7 +64,7 @@ def visualize_train(bbox_pred, num_classes, predictions, im_scale):
                                            predictions['bbox_pred'].data.cpu().numpy(), \
                                            predictions['rois'].data.cpu().numpy()
 
-    im_file = '/data/zwzhou/zhbli/data/VOCdevkit2007/VOC2007/JPEGImages/000203.jpg'
+    im_file = '/data/zwzhou/zhbli/data/VOCdevkit2007/VOC2007/JPEGImages/001588.jpg'
     im = cv2.imread(im_file)
 
     boxes = rois[:, 1:5] / im_scale
@@ -79,7 +79,7 @@ def visualize_train(bbox_pred, num_classes, predictions, im_scale):
         # Simply repeat the boxes, once for each class
         pred_boxes = np.tile(boxes, (1, scores.shape[1]))
 
-    CONF_THRESH = 0.2
+    CONF_THRESH = 0.5
     NMS_THRESH = 0.3
     CLASSES = ('__background__',
                'aeroplane', 'bicycle', 'bird', 'boat',

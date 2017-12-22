@@ -96,6 +96,18 @@ def combined_roidb(imdb_names):
 
 
 if __name__ == '__main__':
+
+  #zhbli
+  if cfg.use_sample_rois_zhbli:
+      print('use_sample_rois_zhbli')
+  if cfg.visualize_train:
+      print('visualize_train')
+  if cfg.only_train_one_img:
+      print('only_train_one_img')
+
+  if cfg.use_sample_rois_zhbli or cfg.visualize_train or cfg.only_train_one_img:
+      input('Customized by zhbli')
+
   args = parse_args()
 
   print('Called with args:')
@@ -143,7 +155,7 @@ if __name__ == '__main__':
     net = mobilenetv1()
   else:
     raise NotImplementedError
-    
+
   train_net(net, imdb, roidb, valroidb, output_dir, tb_dir,
             pretrained_model=args.weight,
             max_iters=args.max_iters)

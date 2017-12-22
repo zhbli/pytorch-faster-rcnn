@@ -13,6 +13,12 @@ __C = edict()
 #   from fast_rcnn_config import cfg
 cfg = __C
 
+#zhbli
+__C.use_sample_rois_zhbli = True
+__C.visualize_train = False
+__C.only_train_one_img = False
+
+
 #
 # Training options
 #

@@ -44,9 +44,14 @@ def proposal_target_layer(rpn_rois, rpn_scores, gt_boxes, _num_classes):
 
   # Sample rois with classification labels and bounding box regression
   # targets
-  labels, rois, roi_scores, bbox_targets, bbox_inside_weights = _sample_rois(
-    all_rois, all_scores, gt_boxes, fg_rois_per_image,
-    rois_per_image, _num_classes)
+  if cfg.use_sample_rois_zhbli:
+      labels, rois, roi_scores, bbox_targets, bbox_inside_weights = _sample_rois_zhbli(
+        all_rois, all_scores, gt_boxes, fg_rois_per_image,
+        rois_per_image, _num_classes)
+  else:
+      labels, rois, roi_scores, bbox_targets, bbox_inside_weights = _sample_rois(
+        all_rois, all_scores, gt_boxes, fg_rois_per_image,
+        rois_per_image, _num_classes)
 
   rois = rois.view(-1, 5)
   roi_scores = roi_scores.view(-1)
@@ -134,6 +139,55 @@ def _sample_rois(all_rois, all_scores, gt_boxes, fg_rois_per_image, rois_per_ima
     to_replace = bg_inds.numel() < rois_per_image
     bg_inds = bg_inds[torch.from_numpy(npr.choice(np.arange(0, bg_inds.numel()), size=int(rois_per_image), replace=to_replace)).long().cuda()]
     fg_rois_per_image = 0
+  else:
+    import pdb
+    pdb.set_trace()
+
+  # The indices that we're selecting (both fg and bg)
+  keep_inds = torch.cat([fg_inds, bg_inds], 0)
+  # Select sampled values from various arrays:
+  labels = labels[keep_inds].contiguous()
+  # Clamp labels for the background RoIs to 0
+  labels[int(fg_rois_per_image):] = 0
+  rois = all_rois[keep_inds].contiguous()
+  roi_scores = all_scores[keep_inds].contiguous()
+
+  bbox_target_data = _compute_targets(
+    rois[:, 1:5].data, gt_boxes[gt_assignment[keep_inds]][:, :4].data, labels.data)
+
+  bbox_targets, bbox_inside_weights = \
+    _get_bbox_regression_labels(bbox_target_data, num_classes)
+
+  return labels, rois, roi_scores, bbox_targets, bbox_inside_weights
+
+def _sample_rois_zhbli(all_rois, all_scores, gt_boxes, fg_rois_per_image, rois_per_image, num_classes):
+  """
+  zhbli: Return 300+ rois. Select background rois by scores.
+  """
+
+  """Generate a random sample of RoIs comprising foreground and background
+  examples.
+  """
+  # overlaps: (rois x gt_boxes)
+  overlaps = bbox_overlaps(
+    all_rois[:, 1:5].data,
+    gt_boxes[:, :4].data)
+  max_overlaps, gt_assignment = overlaps.max(1)
+  labels = gt_boxes[gt_assignment, [4]]
+
+  # Select foreground RoIs as those with >= FG_THRESH overlap
+  fg_inds = (max_overlaps >= cfg.TRAIN.FG_THRESH).nonzero().view(-1)
+  # Guard against the case when an image has fewer than fg_rois_per_image
+  # Select background RoIs as those within [BG_THRESH_LO, BG_THRESH_HI)
+  bg_inds = ((max_overlaps < cfg.TRAIN.BG_THRESH_HI) + (max_overlaps >= cfg.TRAIN.BG_THRESH_LO) == 2).nonzero().view(-1)
+
+  # Small modification to the original version where we ensure a fixed number of regions are sampled
+  if fg_inds.numel() > 0 and bg_inds.numel() > 0:
+    fg_rois_per_image = min(fg_rois_per_image, fg_inds.numel())
+    fg_inds = fg_inds[torch.from_numpy(npr.choice(np.arange(0, fg_inds.numel()), size=int(fg_rois_per_image), replace=False)).long().cuda()]
+    bg_rois_per_image = rois_per_image - fg_rois_per_image
+    to_replace = bg_inds.numel() < bg_rois_per_image
+    bg_inds = bg_inds[0:300]
   else:
     import pdb
     pdb.set_trace()

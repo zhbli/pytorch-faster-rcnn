@@ -78,9 +78,13 @@ class RoIDataLayer(object):
     If cfg.TRAIN.USE_PREFETCH is True, then blobs will be computed in a
     separate process and made available through self._blob_queue.
     """
-    #db_inds = self._get_next_minibatch_inds()
-    db_inds = [100]
-    input('only train img_203')
+
+    #zhbli
+    if cfg.only_train_one_img:
+        #db_inds->img_name 100->203 231->476 788->1588 2702->5388
+        db_inds = [788]
+    else:
+        db_inds = self._get_next_minibatch_inds()
 
     minibatch_db = [self._roidb[i] for i in db_inds]
     return get_minibatch(minibatch_db, self._num_classes)
