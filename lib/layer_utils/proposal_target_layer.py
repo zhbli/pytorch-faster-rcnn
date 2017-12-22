@@ -188,6 +188,16 @@ def _sample_rois_zhbli(all_rois, all_scores, gt_boxes, fg_rois_per_image, rois_p
     bg_rois_per_image = rois_per_image - fg_rois_per_image
     to_replace = bg_inds.numel() < bg_rois_per_image
     bg_inds = bg_inds[0:300]
+  elif fg_inds.numel() > 0:
+    to_replace = fg_inds.numel() < rois_per_image
+    fg_inds = fg_inds[torch.from_numpy(
+        npr.choice(np.arange(0, fg_inds.numel()), size=int(rois_per_image), replace=to_replace)).long().cuda()]
+    fg_rois_per_image = rois_per_image
+  elif bg_inds.numel() > 0:
+    to_replace = bg_inds.numel() < rois_per_image
+    bg_inds = bg_inds[torch.from_numpy(
+        npr.choice(np.arange(0, bg_inds.numel()), size=int(rois_per_image), replace=to_replace)).long().cuda()]
+    fg_rois_per_image = 0
   else:
     import pdb
     pdb.set_trace()
