@@ -147,7 +147,7 @@ def parse_args():
     return args
 
 if __name__ == '__main__':
-    cfg.TEST.HAS_RPN = True  # Use RPN for proposals
+    cfg.TEST.HAS_RPN = True  #Use RPN for proposals
     args = parse_args()
 
     # model path
