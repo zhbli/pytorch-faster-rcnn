@@ -18,6 +18,11 @@ __C.use_sample_rois_zhbli = True
 __C.visualize_train = False
 __C.only_train_one_img = False
 
+# Root directory of project
+__C.ROOT_DIR = osp.abspath(osp.join(osp.dirname(__file__), '..', '..'))
+# Data directory
+#__C.DATA_DIR = osp.abspath(osp.join(__C.ROOT_DIR, 'data'))
+__C.DATA_DIR = '/data/zwzhou/zhbli/data/'
 
 #
 # Training options
@@ -211,6 +216,7 @@ __C.TEST.RPN_POST_NMS_TOP_N = 300
 __C.TEST.MODE = 'top'
 
 # Only useful when TEST.MODE is 'top', specifies the number of top proposals to select
+# zhbli: Warning: If RPN_TOP_N > 300, Out_Of_Memory Error may occur.
 __C.TEST.RPN_TOP_N = 5000
 
 #
@@ -259,13 +265,6 @@ __C.PIXEL_MEANS = np.array([[[102.9801, 115.9465, 122.7717]]])
 
 # For reproducibility
 __C.RNG_SEED = 3
-
-# Root directory of project
-__C.ROOT_DIR = osp.abspath(osp.join(osp.dirname(__file__), '..', '..'))
-
-# Data directory
-#__C.DATA_DIR = osp.abspath(osp.join(__C.ROOT_DIR, 'data'))
-__C.DATA_DIR = '/data/zwzhou/zhbli/data/'
 
 # Name (or path to) the matlab executable
 __C.MATLAB = 'matlab'

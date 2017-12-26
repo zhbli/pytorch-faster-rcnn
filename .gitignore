@@ -1,6 +1,6 @@
 *.so
 *.pyc
-output
+*.pth
 tensorboard
 lib/build
 lib/pycocotools

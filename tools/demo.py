@@ -111,7 +111,7 @@ def demo(net, image_name):
     """Detect object classes in an image using pre-computed object proposals."""
 
     # Load the demo image
-    im_file = os.path.join('/data/zwzhou/zhbli/pytorch-faster-rcnn/data', 'demo', image_name)
+    im_file = os.path.join(cfg.ROOT_DIR, 'data/demo', image_name)
     im = cv2.imread(im_file)
 
     # Detect all object classes and regress object bounds
@@ -148,7 +148,8 @@ def parse_args():
 
 if __name__ == '__main__':
 
-    if cfg.TEST.MODE == 'top':
+    if cfg.TEST.MODE != 'nms' or \
+       cfg.TEST.RPN_TOP_N != 5000:
         input('Customized by zhbli')
 
     cfg.TEST.HAS_RPN = True  #Use RPN for proposals
