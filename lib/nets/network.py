@@ -20,6 +20,7 @@ import utils.timer
 from layer_utils.snippets import generate_anchors_pre
 from layer_utils.proposal_layer import proposal_layer
 from layer_utils.proposal_top_layer import proposal_top_layer
+from layer_utils.proposal_layer_zhbli import proposal_layer_zhbli
 from layer_utils.anchor_target_layer import anchor_target_layer
 from layer_utils.proposal_target_layer import proposal_target_layer
 from utils.visualization import draw_bounding_boxes
@@ -79,6 +80,12 @@ class Network(nn.Module):
     rois, rpn_scores = proposal_top_layer(\
                                     rpn_cls_prob, rpn_bbox_pred, self._im_info,
                                      self._feat_stride, self._anchors, self._num_anchors)
+    return rois, rpn_scores
+
+  def _proposal_layer_zhbli(self, rpn_cls_prob, rpn_bbox_pred):
+    rois, rpn_scores = proposal_layer_zhbli( \
+                                    rpn_cls_prob, rpn_bbox_pred, self._im_info,
+                                    self._feat_stride, self._anchors, self._num_anchors)
     return rois, rpn_scores
 
   def _proposal_layer(self, rpn_cls_prob, rpn_bbox_pred):
@@ -264,6 +271,8 @@ class Network(nn.Module):
         rois, _ = self._proposal_layer(rpn_cls_prob, rpn_bbox_pred)
       elif cfg.TEST.MODE == 'top':
         rois, _ = self._proposal_top_layer(rpn_cls_prob, rpn_bbox_pred)
+      elif cfg.TEST.MODE == 'zhbli':
+        rois, _ = self._proposal_layer_zhbli(rpn_cls_prob, rpn_bbox_pred)
       else:
         raise NotImplementedError
 
