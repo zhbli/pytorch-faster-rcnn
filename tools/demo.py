@@ -147,6 +147,10 @@ def parse_args():
     return args
 
 if __name__ == '__main__':
+
+    if cfg.TEST.MODE == 'top':
+        input('Customized by zhbli')
+
     cfg.TEST.HAS_RPN = True  #Use RPN for proposals
     args = parse_args()
 
