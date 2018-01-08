@@ -7,6 +7,7 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
+import torch
 import _init_paths
 from model.test import test_net
 from model.config import cfg, cfg_from_file, cfg_from_list
@@ -19,7 +20,7 @@ from nets.vgg16 import vgg16
 from nets.resnet_v1 import resnetv1
 from nets.mobilenet_v1 import mobilenetv1
 
-import torch
+
 
 def parse_args():
   """

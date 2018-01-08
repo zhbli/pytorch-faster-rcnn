@@ -2,7 +2,6 @@
 This repo is modified by zhbli.
 
 ## New Features
-- Save detection.pkl into tools/vgg16_voc07_test and tools/vgg16_voc07_trainval
 - Visualize the false negative bboxes.
 - Show the confidence score of every error box.
 
@@ -18,6 +17,7 @@ This repo is modified by zhbli.
 
 **lib/layer_utils/proposal_target_layer.py**
 - Add function ``_sample_rois_zhbli(...)`` to select background rois by scores.
+
 ## Added files ##
 **experiments/scripts/eval_trainval.sh**
 - Get mAP of trainval dataset

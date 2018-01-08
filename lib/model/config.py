@@ -22,7 +22,7 @@ __C.only_train_one_img = False
 __C.ROOT_DIR = osp.abspath(osp.join(osp.dirname(__file__), '..', '..'))
 # Data directory
 #__C.DATA_DIR = osp.abspath(osp.join(__C.ROOT_DIR, 'data'))
-__C.DATA_DIR = '/data/zwzhou/zhbli/data/'
+__C.DATA_DIR = '/data/zhbli/'
 
 #
 # Training options
@@ -213,7 +213,7 @@ __C.TEST.RPN_POST_NMS_TOP_N = 300
 
 # Testing mode, default to be 'nms', 'top' is slower but better
 # See report for details
-__C.TEST.MODE = 'top'
+__C.TEST.MODE = 'nms'
 
 # Only useful when TEST.MODE is 'top', specifies the number of top proposals to select
 # zhbli: Warning: If RPN_TOP_N > 300, Out_Of_Memory Error may occur.

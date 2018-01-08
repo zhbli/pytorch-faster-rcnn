@@ -1,0 +1,20 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="test_net" type="PythonConfigurationType" factoryName="Python">
+    <option name="INTERPRETER_OPTIONS" value="" />
+    <option name="PARENT_ENVS" value="true" />
+    <envs>
+      <env name="PYTHONUNBUFFERED" value="1" />
+    </envs>
+    <option name="SDK_HOME" value="$USER_HOME$/anaconda3/bin/python" />
+    <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/" />
+    <option name="IS_MODULE_SDK" value="false" />
+    <option name="ADD_CONTENT_ROOTS" value="true" />
+    <option name="ADD_SOURCE_ROOTS" value="true" />
+    <module name="pytorch-faster-rcnn" />
+    <option name="SCRIPT_NAME" value="$PROJECT_DIR$/tools/test_net.py" />
+    <option name="PARAMETERS" value="--imdb voc_2007_test --model output/vgg16/voc_2007_trainval/default/vgg16_faster_rcnn_iter_70000.pth --cfg experiments/cfgs/vgg16.yml --net vgg16 --set ANCHOR_SCALES [8,16,32] ANCHOR_RATIOS [0.5,1,2]" />
+    <option name="SHOW_COMMAND_LINE" value="false" />
+    <option name="EMULATE_TERMINAL" value="false" />
+    <method />
+  </configuration>
+</component>
