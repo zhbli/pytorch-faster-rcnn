@@ -1,2 +1,5 @@
 # v2.0
 Visualize the box of error_detections before/after box_regression. It 证明证明证明demonstrates that box_regression won't make the error_localization problem worse.
+
+# v2.1
+Visualize 256 RoIs generated from function _sample_rois(...).

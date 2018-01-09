@@ -87,9 +87,10 @@ class RoIDataLayer(object):
         db_inds = self._get_next_minibatch_inds()
 
     minibatch_db = [self._roidb[i] for i in db_inds]
-    return get_minibatch(minibatch_db, self._num_classes)
+    assert len(db_inds) == 1, "batch size must == 1"
+    return get_minibatch(minibatch_db, self._num_classes), minibatch_db[0]['flipped'], minibatch_db[0]['image']
       
   def forward(self):
     """Get blobs and copy them into this layer's top blob vector."""
-    blobs = self._get_next_minibatch()
-    return blobs
+    blobs, is_flipped, img_name = self._get_next_minibatch()
+    return blobs, is_flipped, img_name

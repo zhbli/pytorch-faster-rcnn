@@ -106,6 +106,8 @@ def _compute_targets(ex_rois, gt_rois, labels):
   return torch.cat(
     [labels.unsqueeze(1), targets], 1)
 
+#def visualize_rois(rois, roi_scores, gt_boxes):
+
 
 def _sample_rois(all_rois, all_scores, gt_boxes, fg_rois_per_image, rois_per_image, num_classes):
   """Generate a random sample of RoIs comprising foreground and background
@@ -151,6 +153,8 @@ def _sample_rois(all_rois, all_scores, gt_boxes, fg_rois_per_image, rois_per_ima
   labels[int(fg_rois_per_image):] = 0
   rois = all_rois[keep_inds].contiguous()
   roi_scores = all_scores[keep_inds].contiguous()
+
+  #visualize_rois(rois, roi_scores, gt_boxes, scales, is_flipped, im_name)
 
   bbox_target_data = _compute_targets(
     rois[:, 1:5].data, gt_boxes[gt_assignment[keep_inds]][:, :4].data, labels.data)

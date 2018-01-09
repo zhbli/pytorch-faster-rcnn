@@ -14,7 +14,7 @@ __C = edict()
 cfg = __C
 
 #zhbli
-__C.use_sample_rois_zhbli = True
+__C.use_sample_rois_zhbli = False
 __C.visualize_train = False
 __C.only_train_one_img = False
 

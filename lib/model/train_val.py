@@ -96,12 +96,12 @@ class SolverWrapper(object):
     # tried my best to find the random states so that it can be recovered exactly
     # However the Tensorflow state is currently not available
     with open(nfile, 'rb') as fid:
-      st0 = pickle.load(fid)
-      cur = pickle.load(fid)
-      perm = pickle.load(fid)
-      cur_val = pickle.load(fid)
-      perm_val = pickle.load(fid)
-      last_snapshot_iter = pickle.load(fid)
+      st0 = pickle.load(fid, encoding='latin1')
+      cur = pickle.load(fid, encoding='latin1')
+      perm = pickle.load(fid, encoding='latin1')
+      cur_val = pickle.load(fid, encoding='latin1')
+      perm_val = pickle.load(fid, encoding='latin1')
+      last_snapshot_iter = pickle.load(fid, encoding='latin1')
 
       np.random.set_state(st0)
       self.data_layer._cur = cur
@@ -246,8 +246,9 @@ class SolverWrapper(object):
 
       utils.timer.timer.tic()
       # Get training data, one batch at a time
-      blobs = self.data_layer.forward()
-
+      blobs, is_flipped, img_name = self.data_layer.forward()
+      self.net.is_flipped = is_flipped
+      self.net.img_name = img_name
       now = time.time()
       if iter == 1 or now - last_summary_time > cfg.TRAIN.SUMMARY_INTERVAL:
         # Compute the graph with summary
@@ -255,7 +256,9 @@ class SolverWrapper(object):
           self.net.train_step_with_summary(blobs, self.optimizer)
         for _sum in summary: self.writer.add_summary(_sum, float(iter))
         # Also check the summary on the validation set
-        blobs_val = self.data_layer_val.forward()
+        blobs_val, is_flipped, img_name = self.data_layer_val.forward()
+        self.net.is_flipped = is_flipped
+        self.net.img_name = img_name
         summary_val = self.net.get_summary(blobs_val)
         for _sum in summary_val: self.valwriter.add_summary(_sum, float(iter))
         last_summary_time = now
