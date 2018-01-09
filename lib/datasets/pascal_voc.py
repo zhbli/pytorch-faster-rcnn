@@ -199,15 +199,39 @@ class pascal_voc(imdb):
       filename)
     return path
 
-  def _write_voc_results_file(self, all_boxes):
+  def _get_voc_results_rois_file_template(self):
+    # VOCdevkit/results/VOC2007/Main/<comp_id>_det_test_aeroplane.txt
+    filename = self._get_comp_id() + '_det_rois_' + self._image_set + '_{:s}.txt'
+    path = os.path.join(
+      self._devkit_path,
+      'results',
+      'VOC' + self._year,
+      'Main',
+      filename)
+    return path   
+
+  def _write_voc_results_file(self, all_boxes, all_rois):
     for cls_ind, cls in enumerate(self.classes):
       if cls == '__background__':
         continue
       print('Writing {} VOC results file'.format(cls))
       filename = self._get_voc_results_file_template().format(cls)
+      filename_rois = self._get_voc_results_rois_file_template().format(cls)
       with open(filename, 'wt') as f:
         for im_ind, index in enumerate(self.image_index):
           dets = all_boxes[cls_ind][im_ind]
+          if dets == []:
+            continue
+          # the VOCdevkit expects 1-based indices
+          for k in range(dets.shape[0]):
+            f.write('{:s} {:.3f} {:.1f} {:.1f} {:.1f} {:.1f}\n'.
+                    format(index, dets[k, -1],
+                           dets[k, 0] + 1, dets[k, 1] + 1,
+                           dets[k, 2] + 1, dets[k, 3] + 1))
+            
+      with open(filename_rois, 'wt') as f:
+        for im_ind, index in enumerate(self.image_index):
+          dets = all_rois[cls_ind][im_ind]
           if dets == []:
             continue
           # the VOCdevkit expects 1-based indices
@@ -240,9 +264,10 @@ class pascal_voc(imdb):
       if cls == '__background__':
         continue
       filename = self._get_voc_results_file_template().format(cls)
+      filename_rois = self._get_voc_results_rois_file_template().format(cls)
       rec, prec, ap = voc_eval(
         filename, annopath, imagesetfile, cls, cachedir, ovthresh=0.5,
-        use_07_metric=use_07_metric, use_diff=self.config['use_diff'])
+        use_07_metric=use_07_metric, use_diff=self.config['use_diff'], roipath=filename_rois)
       aps += [ap]
       print(('AP for {} = {:.4f}'.format(cls, ap)))
       with open(os.path.join(output_dir, cls + '_pr.pkl'), 'wb') as f:
@@ -277,8 +302,8 @@ class pascal_voc(imdb):
     print(('Running:\n{}'.format(cmd)))
     status = subprocess.call(cmd, shell=True)
 
-  def evaluate_detections(self, all_boxes, output_dir):
-    self._write_voc_results_file(all_boxes)
+  def evaluate_detections(self, all_boxes, output_dir, all_rois):
+    self._write_voc_results_file(all_boxes, all_rois)
     self._do_python_eval(output_dir)
     if self.config['matlab_eval']:
       self._do_matlab_eval(output_dir)

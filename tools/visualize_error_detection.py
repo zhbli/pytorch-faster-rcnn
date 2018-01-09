@@ -23,8 +23,12 @@ from nets.vgg16 import vgg16
 
 if __name__ == '__main__':
     filename = 'output/bird_false_positive.txt'
+    filename_rois = 'output/bird_false_positive_rois.txt'
     f = open(filename, 'rb')
     d = pickle.load(f)
+    f.close()
+    f = open(filename_rois, 'rb')
+    rois = pickle.load(f)
     f.close()
 
     for i in range(len(d)):
@@ -37,12 +41,19 @@ if __name__ == '__main__':
         ax.imshow(im, aspect='equal')
 
         bbox = d[i][0][3:]
+        roi = rois[i][0][3:]
         score = d[i][2]
         ax.add_patch(
             plt.Rectangle((bbox[0], bbox[1]),
                           bbox[2] - bbox[0],
                           bbox[3] - bbox[1], fill=False,
                           edgecolor='red', linewidth=3.5)
+        )
+        ax.add_patch(
+            plt.Rectangle((roi[0], roi[1]),
+                          roi[2] - roi[0],
+                          roi[3] - roi[1], fill=False,
+                          edgecolor='yellow', linewidth=3.5)
         )
         for j in range(len(d[i][1])):
             gtbox = d[i][1][j]

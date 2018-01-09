@@ -53,15 +53,18 @@ def from_dets(imdb_name, output_dir, args):
   imdb.config['matlab_eval'] = args.matlab_eval
   with open(os.path.join(output_dir, 'detections.pkl'), 'rb') as f:
     dets = pickle.load(f)
+  with open(os.path.join(output_dir, 'detections_rois.pkl'), 'rb') as f:
+    rois = pickle.load(f)
 
   if args.apply_nms:
+    assert False, 'No nms step in test.py -> test_net'
     print('Applying NMS to all detections')
     nms_dets = apply_nms(dets, cfg.TEST.NMS)
   else:
     nms_dets = dets
 
   print('Evaluating detections')
-  imdb.evaluate_detections(nms_dets, output_dir)
+  imdb.evaluate_detections(nms_dets, output_dir, rois)
 
 
 if __name__ == '__main__':

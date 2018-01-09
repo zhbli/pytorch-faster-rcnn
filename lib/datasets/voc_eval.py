@@ -73,7 +73,7 @@ def voc_eval(detpath,
              cachedir,
              ovthresh=0.5,
              use_07_metric=False,
-             use_diff=False):
+             use_diff=False, roipath=''):
   """rec, prec, ap = voc_eval(detpath,
                               annopath,
                               imagesetfile,
@@ -146,13 +146,18 @@ def voc_eval(detpath,
 
   # read dets
   detfile = detpath.format(classname)
+  roifile = roipath.format(classname)
   with open(detfile, 'r') as f:
     lines = f.readlines()
+  with open(roifile, 'r') as f:
+    lines_rois = f.readlines()
 
   splitlines = [x.strip().split(' ') for x in lines]
+  splitlines_rois = [x.strip().split(' ') for x in lines_rois]
   image_ids = [x[0] for x in splitlines]
   confidence = np.array([float(x[1]) for x in splitlines])
   BB = np.array([[float(z) for z in x[2:]] for x in splitlines])
+  rois = np.array([[float(z) for z in x[2:]] for x in splitlines_rois])
 
   nd = len(image_ids)
   tp = np.zeros(nd)
@@ -160,8 +165,11 @@ def voc_eval(detpath,
 
   #zhbli(1): write false negative info
   false_positive_file_name = 'output/%s_false_positive.txt' % (classname)
+  false_positive_rois_file_name = 'output/%s_false_positive_rois.txt' % (classname)
   false_positive_file = open(false_positive_file_name, 'wb')
+  false_positive_rois_file = open(false_positive_rois_file_name, 'wb')
   fp_table = [[] for i in range(npos)]
+  fp_table_rois = [[] for i in range(npos)]
   fp_idx = 0
 
   if BB.shape[0] > 0:
@@ -169,12 +177,14 @@ def voc_eval(detpath,
     sorted_ind = np.argsort(-confidence)
     sorted_scores = np.sort(-confidence)
     BB = BB[sorted_ind, :]
+    rois = rois[sorted_ind, :]
     image_ids = [image_ids[x] for x in sorted_ind]
 
     # go down dets and mark TPs and FPs
     for d in range(nd):
       R = class_recs[image_ids[d]]
       bb = BB[d, :].astype(float)
+      roi = rois[d, :].astype(float)
       ovmax = -np.inf
       BBGT = R['bbox'].astype(float)
 
@@ -209,6 +219,7 @@ def voc_eval(detpath,
             #zhbli(2): write false negative info
             if d < npos:
                 fp_table[fp_idx] = [[image_ids[d], classname, 'err_repeat'] + bb.tolist(), BBGT.tolist(), -sorted_scores[d].tolist()]
+                fp_table_rois[fp_idx] = [[image_ids[d], classname, 'err_repeat'] + roi.tolist(), BBGT.tolist(), -sorted_scores[d].tolist()]
                 fp_idx = fp_idx + 1
       else:
         fp[d] = 1.
@@ -216,11 +227,14 @@ def voc_eval(detpath,
         # zhbli(3): write false negative info
         if d < npos:
             fp_table[fp_idx] = [[image_ids[d], classname, 'err_lowIoU'] + bb.tolist(), BBGT.tolist(), -sorted_scores[d].tolist()]
+            fp_table_rois[fp_idx] = [[image_ids[d], classname, 'err_repeat'] + roi.tolist(), BBGT.tolist(), -sorted_scores[d].tolist()]
             fp_idx = fp_idx + 1
 
     # zhbli(4): write false negative info
     pickle.dump(fp_table, false_positive_file)
+    pickle.dump(fp_table_rois, false_positive_rois_file)
     false_positive_file.close()
+    false_positive_rois_file.close()
 
   # compute precision recall
   fp = np.cumsum(fp)
