@@ -18,11 +18,11 @@ import matplotlib.pyplot as plt
 import numpy as np
 import os, cv2
 import argparse
-
+import time
 from nets.vgg16 import vgg16
 
 if __name__ == '__main__':
-    filename = 'output/false_detection_logs/sofa_false_positive.txt'
+    filename = 'output/bird_false_positive.txt'
     f = open(filename, 'rb')
     d = pickle.load(f)
     f.close()
@@ -30,7 +30,7 @@ if __name__ == '__main__':
     for i in range(len(d)):
         if len(d[i]) == 0:
             break
-        im_file = '/data/zwzhou/zhbli/data/VOCdevkit2007/VOC2007/JPEGImages/%s.jpg'%(d[i][0][0])
+        im_file = '/data/zhbli/VOCdevkit/VOC2007/JPEGImages/%s.jpg'%(d[i][0][0])
         im = cv2.imread(im_file)
         im = im[:, :, (2, 1, 0)]
         fig, ax = plt.subplots(figsize=(12, 12))
@@ -54,9 +54,10 @@ if __name__ == '__main__':
             )
 
         ax.text(bbox[0], bbox[1] - 2,
-                '{:s}'.format(d[i][0]) + ' score={:f}'.format(score),
+                '{:s}'.format(d[i][0][0]) + ' score={:f}'.format(score),
                 bbox=dict(facecolor='blue', alpha=0.5),
                 fontsize=10, color='white')
         plt.axis('off')
         plt.tight_layout()
         plt.draw()
+        plt.show()
