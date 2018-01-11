@@ -3,3 +3,7 @@ Visualize the box of error_detections before/after box_regression. It 证明证�
 
 # v2.1
 Visualize 256 RoIs generated from function _sample_rois(...).
+
+# v2.2
+Save error detection:
+- New file: save_error_detection.py
