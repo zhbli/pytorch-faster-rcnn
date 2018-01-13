@@ -81,8 +81,8 @@ class RoIDataLayer(object):
 
     #zhbli
     if cfg.only_train_one_img:
-        #db_inds->img_name 100->203 231->476 788->1588 2702->5388
-        db_inds = [788]
+        #db_inds->img_name 100->203 231->476 788->1588 2702->5388 4843->9634 4995->9935
+        db_inds = [4995]
     else:
         db_inds = self._get_next_minibatch_inds()
 
