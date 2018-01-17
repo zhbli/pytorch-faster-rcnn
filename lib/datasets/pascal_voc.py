@@ -186,6 +186,10 @@ class pascal_voc(imdb):
   def _get_comp_id(self):
     comp_id = (self._comp_id + '_' + self._salt if self.config['use_salt']
                else self._comp_id)
+
+    # print('old file')
+    # comp_id = 'comp4_dec16590-7126-4b24-9a97-604011c7b4e6'
+
     return comp_id
 
   def _get_voc_results_file_template(self):
@@ -303,6 +307,8 @@ class pascal_voc(imdb):
     status = subprocess.call(cmd, shell=True)
 
   def evaluate_detections(self, all_boxes, output_dir, all_rois):
+
+    #print('donot write results files')
     self._write_voc_results_file(all_boxes, all_rois)
     self._do_python_eval(output_dir)
     if self.config['matlab_eval']:

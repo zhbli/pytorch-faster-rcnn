@@ -5,5 +5,13 @@ Visualize the box of error_detections before/after box_regression. It 证明证�
 Visualize 256 RoIs generated from function _sample_rois(...).
 
 # v2.2
-Save error detection:
+Visualize/Save error detection:
 - New file: save_error_detection.py
+
+# v3.0
+Save all detection results as images_with_bboxes.
+
+Usage: Run `reval.py`
+
+Change list:
+- [Modify_function] voc_eval

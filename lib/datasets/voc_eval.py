@@ -11,6 +11,8 @@ import xml.etree.ElementTree as ET
 import os
 import pickle
 import numpy as np
+import cv2
+import matplotlib.pyplot as plt
 
 def parse_rec(filename):
   """ Parse a PASCAL VOC xml file """
@@ -128,12 +130,17 @@ def voc_eval(detpath,
       except:
         recs = pickle.load(f, encoding='bytes')
 
+  # v3.0
+  det_results = {}
+  # v3.0
+
   # extract gt objects for this class
   class_recs = {}
   npos = 0
   for imagename in imagenames:
     R = [obj for obj in recs[imagename] if obj['name'] == classname]
     bbox = np.array([x['bbox'] for x in R])
+    truncated = np.array([x['truncated'] for x in R]).astype(np.bool)
     if use_diff:
       difficult = np.array([False for x in R]).astype(np.bool)
     else:
@@ -143,6 +150,20 @@ def voc_eval(detpath,
     class_recs[imagename] = {'bbox': bbox,
                              'difficult': difficult,
                              'det': det}
+
+    # v3.0
+    det_results[imagename] = {}
+    det_results[imagename]['gt'] = {}
+    det_results[imagename]['det'] = {}
+    det_results[imagename]['det']['bbox'] = np.zeros([0,4])
+    det_results[imagename]['det']['score'] = []
+    det_results[imagename]['det']['result_info'] = []
+    det_results[imagename]['det']['overlap'] = []
+    det_results[imagename]['gt']['bbox'] = bbox
+    det_results[imagename]['gt']['difficult'] = difficult
+    det_results[imagename]['gt']['truncated'] = truncated
+    det_results[imagename]['gt']['detected'] = det
+    # v3.0
 
   # read dets
   detfile = detpath.format(classname)
@@ -213,8 +234,26 @@ def voc_eval(detpath,
           if not R['det'][jmax]:
             tp[d] = 1.
             R['det'][jmax] = 1
+
+            # v3.0
+            det_results[image_ids[d]]['gt']['detected'][jmax] = 1  # the jmax'th gt is detected.
+            det_results[image_ids[d]]['det']['bbox'] = np.append(det_results[image_ids[d]]['det']['bbox'], np.expand_dims(bb, 0), axis=0)
+            det_results[image_ids[d]]['det']['score'].append(-sorted_scores[d])
+            det_results[image_ids[d]]['det']['result_info'].append('correct')
+            det_results[image_ids[d]]['det']['overlap'].append(ovmax)
+            # v3.0
+
           else:
             fp[d] = 1.
+
+            # v3.0
+            if -sorted_scores[d] > 0.1:
+                det_results[image_ids[d]]['det']['bbox'] = np.append(det_results[image_ids[d]]['det']['bbox'],
+                                                                     np.expand_dims(bb, 0), axis=0)
+                det_results[image_ids[d]]['det']['score'].append(-sorted_scores[d])
+                det_results[image_ids[d]]['det']['result_info'].append('err_repeat')
+                det_results[image_ids[d]]['det']['overlap'].append(ovmax)
+            # v3.0
 
             #zhbli(2): write false negative info
             if d < npos:
@@ -223,6 +262,15 @@ def voc_eval(detpath,
                 fp_idx = fp_idx + 1
       else:
         fp[d] = 1.
+
+        # v3.0
+        if -sorted_scores[d] > 0.1:
+            det_results[image_ids[d]]['det']['bbox'] = np.append(det_results[image_ids[d]]['det']['bbox'],
+                                                                 np.expand_dims(bb, 0), axis=0)
+            det_results[image_ids[d]]['det']['score'].append(-sorted_scores[d])
+            det_results[image_ids[d]]['det']['result_info'].append('err_lowIoU')
+            det_results[image_ids[d]]['det']['overlap'].append(ovmax)
+        # v3.0
 
         # zhbli(3): write false negative info
         if d < npos:
@@ -235,6 +283,67 @@ def voc_eval(detpath,
     pickle.dump(fp_table_rois, false_positive_rois_file)
     false_positive_file.close()
     false_positive_rois_file.close()
+
+  # v3.0
+  for i in range(len(det_results)):
+  # for every img
+      img_name = str(i).zfill(6)
+      if not det_results.__contains__(img_name):
+          continue
+      gt_num = det_results[img_name]['gt']['bbox'].shape[0]
+      det_num = det_results[img_name]['det']['bbox'].shape[0]
+      if gt_num != 0 or det_num != 0:
+          print('saving img: {:s}'.format(img_name))
+          im_file = '/data/zhbli/VOCdevkit/VOC2007/JPEGImages/%s.jpg' % img_name
+          im = cv2.imread(im_file)
+          im = im[:, :, (2, 1, 0)]
+          fig, ax = plt.subplots(figsize=(12, 12))
+          ax.imshow(im, aspect='equal')
+      else:
+          continue
+
+      if gt_num != 0:
+          for j in range(gt_num):
+              bbox = det_results[img_name]['gt']['bbox'][j]
+              difficult = det_results[img_name]['gt']['difficult'][j]
+              truncated = det_results[img_name]['gt']['truncated'][j]
+              detected = det_results[img_name]['gt']['detected'][j]
+              ax.add_patch(
+                  plt.Rectangle((bbox[0], bbox[1]),
+                                bbox[2] - bbox[0],
+                                bbox[3] - bbox[1], fill=False, edgecolor='green',
+                                linewidth=1.5, linestyle='solid')
+              )
+              ax.text(bbox[0], bbox[1] - 2,
+                      'gt: difficult: {:d}, detected: {:d}, truncated: {:d}'.format(int(difficult), int(detected), int(truncated)),
+                      bbox=dict(facecolor='green', alpha=0.5),
+                      fontsize=10, color='white')
+
+      if det_num != 0:
+          for j in range(det_num):
+              bbox = det_results[img_name]['det']['bbox'][j]
+              score = det_results[img_name]['det']['score'][j]
+              result_info = det_results[img_name]['det']['result_info'][j]
+              overlap = det_results[img_name]['det']['overlap'][j]
+              ax.add_patch(
+                  plt.Rectangle((bbox[0], bbox[1]),
+                                bbox[2] - bbox[0],
+                                bbox[3] - bbox[1], fill=False, edgecolor='red',
+                                linewidth=1.5, linestyle='dashed')
+              )
+              ax.text(bbox[0], bbox[3],
+                      '{:s}, score={:f}, overlap={:f}'.format(result_info, score, overlap),
+                      bbox=dict(facecolor='red', alpha=0.5),
+                      fontsize=10, color='white')
+
+      ax.set_title('img_name: {:s}, class: {:s}'.format(img_name, classname),
+                   fontsize=14)
+      plt.axis('off')
+      plt.tight_layout()
+      if not os.path.exists('/data/zhbli/VOCdevkit/results/VOC2007/vgg16_faster-rcnn/{:s}'.format(classname)):
+        os.mkdir('/data/zhbli/VOCdevkit/results/VOC2007/vgg16_faster-rcnn/{:s}'.format(classname))
+      plt.savefig('/data/zhbli/VOCdevkit/results/VOC2007/vgg16_faster-rcnn/{:s}/{:s}.jpg'.format(classname, img_name))
+  # v3.0
 
   # compute precision recall
   fp = np.cumsum(fp)
