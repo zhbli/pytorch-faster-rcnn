@@ -188,7 +188,7 @@ class pascal_voc(imdb):
                else self._comp_id)
 
     # print('old file')
-    # comp_id = 'comp4_dec16590-7126-4b24-9a97-604011c7b4e6'
+    #comp_id = 'comp4_3a28dd7d-06b1-450e-8672-b49bcdd3f7aa'
 
     return comp_id
 

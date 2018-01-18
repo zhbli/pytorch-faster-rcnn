@@ -284,6 +284,23 @@ def voc_eval(detpath,
     false_positive_file.close()
     false_positive_rois_file.close()
 
+  # v3.1
+  if not os.path.exists('/data/zhbli/VOCdevkit/results/VOC2007/vgg16_faster-rcnn/{:s}'.format(classname)):
+      os.mkdir('/data/zhbli/VOCdevkit/results/VOC2007/vgg16_faster-rcnn/{:s}'.format(classname))
+
+  # no missed, no fp
+  if not os.path.exists('/data/zhbli/VOCdevkit/results/VOC2007/vgg16_faster-rcnn/{:s}/correct'.format(classname)):
+      os.mkdir('/data/zhbli/VOCdevkit/results/VOC2007/vgg16_faster-rcnn/{:s}/correct'.format(classname))
+
+  # no gt, fp
+  if not os.path.exists('/data/zhbli/VOCdevkit/results/VOC2007/vgg16_faster-rcnn/{:s}/no_gt_fp'.format(classname)):
+      os.mkdir('/data/zhbli/VOCdevkit/results/VOC2007/vgg16_faster-rcnn/{:s}/no_gt_fp'.format(classname))
+
+  # other
+  if not os.path.exists('/data/zhbli/VOCdevkit/results/VOC2007/vgg16_faster-rcnn/{:s}/other'.format(classname)):
+      os.mkdir('/data/zhbli/VOCdevkit/results/VOC2007/vgg16_faster-rcnn/{:s}/other'.format(classname))
+  # v3.1
+
   # v3.0
   for i in range(len(det_results)):
   # for every img
@@ -300,7 +317,7 @@ def voc_eval(detpath,
           fig, ax = plt.subplots(figsize=(12, 12))
           ax.imshow(im, aspect='equal')
       else:
-          continue
+          continue  # If the img has no gt and no det, will not save this img.
 
       if gt_num != 0:
           for j in range(gt_num):
@@ -308,16 +325,29 @@ def voc_eval(detpath,
               difficult = det_results[img_name]['gt']['difficult'][j]
               truncated = det_results[img_name]['gt']['truncated'][j]
               detected = det_results[img_name]['gt']['detected'][j]
-              ax.add_patch(
-                  plt.Rectangle((bbox[0], bbox[1]),
-                                bbox[2] - bbox[0],
-                                bbox[3] - bbox[1], fill=False, edgecolor='green',
-                                linewidth=1.5, linestyle='solid')
-              )
-              ax.text(bbox[0], bbox[1] - 2,
-                      'gt: difficult: {:d}, detected: {:d}, truncated: {:d}'.format(int(difficult), int(detected), int(truncated)),
-                      bbox=dict(facecolor='green', alpha=0.5),
-                      fontsize=10, color='white')
+              if detected == 1:  # If the gt is found
+                  ax.add_patch(
+                      plt.Rectangle((bbox[0], bbox[1]),
+                                    bbox[2] - bbox[0],
+                                    bbox[3] - bbox[1], fill=False, edgecolor='blue',
+                                    linewidth=1.5, linestyle='solid')
+                  )
+                  ax.text(bbox[0], bbox[1] - 2,
+                          'gt: difficult: {:d}, detected: {:d}, truncated: {:d}'.format(int(difficult), int(detected),
+                                                                                        int(truncated)),
+                          bbox=dict(facecolor='blue', alpha=0.5),
+                          fontsize=8, color='white')
+              else:
+                  ax.add_patch(
+                      plt.Rectangle((bbox[0], bbox[1]),
+                                    bbox[2] - bbox[0],
+                                    bbox[3] - bbox[1], fill=False, edgecolor='yellow',
+                                    linewidth=1.5, linestyle='solid')
+                  )
+                  ax.text(bbox[0], bbox[1] - 2,
+                          'gt: difficult: {:d}, detected: {:d}, truncated: {:d}'.format(int(difficult), int(detected), int(truncated)),
+                          bbox=dict(facecolor='yellow', alpha=0.5),
+                          fontsize=8, color='white')
 
       if det_num != 0:
           for j in range(det_num):
@@ -325,24 +355,41 @@ def voc_eval(detpath,
               score = det_results[img_name]['det']['score'][j]
               result_info = det_results[img_name]['det']['result_info'][j]
               overlap = det_results[img_name]['det']['overlap'][j]
-              ax.add_patch(
-                  plt.Rectangle((bbox[0], bbox[1]),
-                                bbox[2] - bbox[0],
-                                bbox[3] - bbox[1], fill=False, edgecolor='red',
-                                linewidth=1.5, linestyle='dashed')
-              )
-              ax.text(bbox[0], bbox[3],
-                      '{:s}, score={:f}, overlap={:f}'.format(result_info, score, overlap),
-                      bbox=dict(facecolor='red', alpha=0.5),
-                      fontsize=10, color='white')
+              if result_info == 'correct':
+                  ax.add_patch(
+                      plt.Rectangle((bbox[0], bbox[1]),
+                                    bbox[2] - bbox[0],
+                                    bbox[3] - bbox[1], fill=False, edgecolor='green',
+                                    linewidth=1.5, linestyle='dashed'))
+                  ax.text(bbox[0], bbox[3],
+                          '{:s}, score={:f}, overlap={:f}'.format(result_info, score, overlap),
+                          bbox=dict(facecolor='green', alpha=0.5),
+                          fontsize=8, color='white')
+              else:
+                  ax.add_patch(
+                      plt.Rectangle((bbox[0], bbox[1]),
+                                    bbox[2] - bbox[0],
+                                    bbox[3] - bbox[1], fill=False, edgecolor='red',
+                                    linewidth=1.5, linestyle='dashed')
+                  )
+                  ax.text(bbox[0], bbox[3],
+                          '{:s}, score={:f}, overlap={:f}'.format(result_info, score, overlap),
+                          bbox=dict(facecolor='red', alpha=0.5),
+                          fontsize=8, color='white')
+
 
       ax.set_title('img_name: {:s}, class: {:s}'.format(img_name, classname),
                    fontsize=14)
       plt.axis('off')
       plt.tight_layout()
-      if not os.path.exists('/data/zhbli/VOCdevkit/results/VOC2007/vgg16_faster-rcnn/{:s}'.format(classname)):
-        os.mkdir('/data/zhbli/VOCdevkit/results/VOC2007/vgg16_faster-rcnn/{:s}'.format(classname))
-      plt.savefig('/data/zhbli/VOCdevkit/results/VOC2007/vgg16_faster-rcnn/{:s}/{:s}.jpg'.format(classname, img_name))
+
+      if gt_num == 0:
+        plt.savefig('/data/zhbli/VOCdevkit/results/VOC2007/vgg16_faster-rcnn/{:s}/no_gt_fp/{:s}.jpg'.format(classname, img_name))
+      elif det_num != 0 and det_results[img_name]['det']['result_info'].count('correct')==len(det_results[img_name]['det']['result_info']) \
+              and det_results[img_name]['gt']['detected'].count(1) == len(det_results[img_name]['gt']['detected']):
+        plt.savefig('/data/zhbli/VOCdevkit/results/VOC2007/vgg16_faster-rcnn/{:s}/correct/{:s}.jpg'.format(classname, img_name))
+      else:
+        plt.savefig('/data/zhbli/VOCdevkit/results/VOC2007/vgg16_faster-rcnn/{:s}/other/{:s}.jpg'.format(classname, img_name))
   # v3.0
 
   # compute precision recall

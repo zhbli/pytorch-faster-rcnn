@@ -15,3 +15,11 @@ Usage: Run `reval.py`
 
 Change list:
 - [Modify_function] voc_eval
+
+# v3.1
+Save det_results in a better way.
+
+Usage: Run `reval.py`
+
+Change list:
+- [Modify_function] voc_eval
