@@ -212,6 +212,9 @@ class Network(nn.Module):
   def _proposal_target_layer(self, rois, roi_scores):
       proposal_target_layer(
       rois, roi_scores, self._gt_boxes, self._num_classes)
+      self.visualize_rois(rois.data.cpu().numpy()[:, 1:], roi_scores.data.cpu().numpy(),
+                          self._gt_boxes.data.cpu().numpy(), self.is_flipped, self.img_name, self._im_info[1],
+                          self._im_info[2])
 
   def _anchor_component(self, height, width):
     # just to get the shape right
