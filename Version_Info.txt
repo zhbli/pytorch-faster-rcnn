@@ -3,6 +3,8 @@
 # v1.0
 Visualize foreground rois.
 
+Usage: Run `trainval_net.py`
+
 Change list:
 - [Modify_function] train_model
 - [Modify_function] train_step
