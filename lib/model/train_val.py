@@ -236,66 +236,21 @@ class SolverWrapper(object):
     self.net.cuda()
 
     while iter < max_iters + 1:
-      # Learning rate
-      if iter == next_stepsize + 1:
-        # Add snapshot here before reducing the learning rate
-        self.snapshot(iter)
-        lr *= cfg.TRAIN.GAMMA
-        scale_lr(self.optimizer, cfg.TRAIN.GAMMA)
-        next_stepsize = stepsizes.pop()
-
       utils.timer.timer.tic()
       # Get training data, one batch at a time
       blobs, is_flipped, img_name = self.data_layer.forward()
       self.net.is_flipped = is_flipped
       self.net.img_name = img_name
       now = time.time()
-      if iter == 1 or now - last_summary_time > cfg.TRAIN.SUMMARY_INTERVAL:
-        # Compute the graph with summary
-        rpn_loss_cls, rpn_loss_box, loss_cls, loss_box, total_loss, summary = \
-          self.net.train_step_with_summary(blobs, self.optimizer)
-        for _sum in summary: self.writer.add_summary(_sum, float(iter))
-        # Also check the summary on the validation set
-        blobs_val, is_flipped, img_name = self.data_layer_val.forward()
-        self.net.is_flipped = is_flipped
-        self.net.img_name = img_name
-        summary_val = self.net.get_summary(blobs_val)
-        for _sum in summary_val: self.valwriter.add_summary(_sum, float(iter))
-        last_summary_time = now
-      else:
-        # Compute the graph without summary
-        rpn_loss_cls, rpn_loss_box, loss_cls, loss_box, total_loss = \
-          self.net.train_step(blobs, self.optimizer)
+      # Compute the graph without summary
+      self.net.train_step(blobs, self.optimizer)
       utils.timer.timer.toc()
 
       # Display training information
       if iter % (cfg.TRAIN.DISPLAY) == 0:
-        print('iter: %d / %d, total loss: %.6f\n >>> rpn_loss_cls: %.6f\n '
-              '>>> rpn_loss_box: %.6f\n >>> loss_cls: %.6f\n >>> loss_box: %.6f\n >>> lr: %f' % \
-              (iter, max_iters, total_loss, rpn_loss_cls, rpn_loss_box, loss_cls, loss_box, lr))
         print('speed: {:.3f}s / iter'.format(utils.timer.timer.average_time()))
 
-        # for k in utils.timer.timer._average_time.keys():
-        #   print(k, utils.timer.timer.average_time(k))
-
-      # Snapshotting
-      if iter % cfg.TRAIN.SNAPSHOT_ITERS == 0:
-        last_snapshot_iter = iter
-        ss_path, np_path = self.snapshot(iter)
-        np_paths.append(np_path)
-        ss_paths.append(ss_path)
-
-        # Remove the old snapshots if there are too many
-        if len(np_paths) > cfg.TRAIN.SNAPSHOT_KEPT:
-          self.remove_snapshot(np_paths, ss_paths)
-
       iter += 1
-
-    if last_snapshot_iter != iter - 1:
-      self.snapshot(iter - 1)
-
-    self.writer.close()
-    self.valwriter.close()
 
 
 def get_training_roidb(imdb):

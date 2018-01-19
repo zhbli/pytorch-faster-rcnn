@@ -42,26 +42,9 @@ def proposal_target_layer(rpn_rois, rpn_scores, gt_boxes, _num_classes):
   rois_per_image = cfg.TRAIN.BATCH_SIZE / num_images
   fg_rois_per_image = int(round(cfg.TRAIN.FG_FRACTION * rois_per_image))
 
-  # Sample rois with classification labels and bounding box regression
-  # targets
-  if cfg.use_sample_rois_zhbli:
-      labels, rois, roi_scores, bbox_targets, bbox_inside_weights = _sample_rois_zhbli(
-        all_rois, all_scores, gt_boxes, fg_rois_per_image,
-        rois_per_image, _num_classes)
-  else:
-      labels, rois, roi_scores, bbox_targets, bbox_inside_weights = _sample_rois(
-        all_rois, all_scores, gt_boxes, fg_rois_per_image,
-        rois_per_image, _num_classes)
-
-  rois = rois.view(-1, 5)
-  roi_scores = roi_scores.view(-1)
-  labels = labels.view(-1, 1)
-  bbox_targets = bbox_targets.view(-1, _num_classes * 4)
-  bbox_inside_weights = bbox_inside_weights.view(-1, _num_classes * 4)
-  bbox_outside_weights = (bbox_inside_weights > 0).float()
-
-  return rois, roi_scores, labels, Variable(bbox_targets), Variable(bbox_inside_weights), Variable(bbox_outside_weights)
-
+  _sample_rois(
+    all_rois, all_scores, gt_boxes, fg_rois_per_image,
+    rois_per_image, _num_classes)
 
 def _get_bbox_regression_labels(bbox_target_data, num_classes):
   """Bounding-box regression targets (bbox_target_data) are stored in a
@@ -110,6 +93,7 @@ def _compute_targets(ex_rois, gt_rois, labels):
 
 
 def _sample_rois(all_rois, all_scores, gt_boxes, fg_rois_per_image, rois_per_image, num_classes):
+  print('hehe')
   """Generate a random sample of RoIs comprising foreground and background
   examples.
   """
@@ -162,7 +146,7 @@ def _sample_rois(all_rois, all_scores, gt_boxes, fg_rois_per_image, rois_per_ima
   bbox_targets, bbox_inside_weights = \
     _get_bbox_regression_labels(bbox_target_data, num_classes)
 
-  return labels, rois, roi_scores, bbox_targets, bbox_inside_weights
+
 
 def _sample_rois_zhbli(all_rois, all_scores, gt_boxes, fg_rois_per_image, rois_per_image, num_classes):
   """

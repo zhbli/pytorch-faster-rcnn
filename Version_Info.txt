@@ -1,34 +1,14 @@
-# v2.0
-Visualize the box of error_detections before/after box_regression. It 证明证明证明demonstrates that box_regression won't make the error_localization problem worse.
+# origin version: master -> v3.2
 
-# v2.1
-Visualize 256 RoIs generated from function _sample_rois(...).
-
-# v2.2
-Visualize/Save error detection:
-- New file: save_error_detection.py
-
-# v3.0
-Save all detection results as images_with_bboxes.
-
-Usage: Run `reval.py`
+# v1.0
+Visualize foreground rois.
 
 Change list:
-- [Modify_function] voc_eval
-
-# v3.1
-Save det_results in a better way.
-
-Usage: Run `reval.py`
-
-Change list:
-- [Modify_function] voc_eval
-
-# v3.2
-Save false_positives and missed_ground_truth.
-
-Change list:
-- [Add_file] global_var.py
-- [Modify_file] pascal_voc.py
-- [Modify_file] reval.py
-- [Add_function] voc_eval_v32
+- [Modify_function] train_model
+- [Modify_function] train_step
+- [Modify_function] Network.forward
+- [Modify_function] _predict
+- [Modify_function] _region_proposal
+- [Modify_function] _proposal_target_layer
+- [Modify_function] proposal_target_layer
+- [Modify_function] _sample_rois

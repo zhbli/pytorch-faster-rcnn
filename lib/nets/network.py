@@ -210,22 +210,8 @@ class Network(nn.Module):
             #plt.show()
 
   def _proposal_target_layer(self, rois, roi_scores):
-    rois, roi_scores, labels, bbox_targets, bbox_inside_weights, bbox_outside_weights = \
       proposal_target_layer(
       rois, roi_scores, self._gt_boxes, self._num_classes)
-
-    self.visualize_rois(rois.data.cpu().numpy()[:,1:], roi_scores.data.cpu().numpy(), self._gt_boxes.data.cpu().numpy(), self.is_flipped, self.img_name, self._im_info[1], self._im_info[2])
-
-    self._proposal_targets['rois'] = rois
-    self._proposal_targets['labels'] = labels.long()
-    self._proposal_targets['bbox_targets'] = bbox_targets
-    self._proposal_targets['bbox_inside_weights'] = bbox_inside_weights
-    self._proposal_targets['bbox_outside_weights'] = bbox_outside_weights
-
-    for k in self._proposal_targets.keys():
-      self._score_summaries[k] = self._proposal_targets[k]
-
-    return rois, roi_scores
 
   def _anchor_component(self, height, width):
     # just to get the shape right
@@ -316,7 +302,7 @@ class Network(nn.Module):
     if self._mode == 'TRAIN':
       rois, roi_scores = self._proposal_layer(rpn_cls_prob, rpn_bbox_pred) # rois, roi_scores are varible
       rpn_labels = self._anchor_target_layer(rpn_cls_score)
-      rois, _ = self._proposal_target_layer(rois, roi_scores)
+      self._proposal_target_layer(rois, roi_scores)
     else:
       if cfg.TEST.MODE == 'nms':
         rois, _ = self._proposal_layer(rpn_cls_prob, rpn_bbox_pred)
@@ -324,15 +310,6 @@ class Network(nn.Module):
         rois, _ = self._proposal_top_layer(rpn_cls_prob, rpn_bbox_pred)
       else:
         raise NotImplementedError
-
-    self._predictions["rpn_cls_score"] = rpn_cls_score
-    self._predictions["rpn_cls_score_reshape"] = rpn_cls_score_reshape
-    self._predictions["rpn_cls_prob"] = rpn_cls_prob
-    self._predictions["rpn_cls_pred"] = rpn_cls_pred
-    self._predictions["rpn_bbox_pred"] = rpn_bbox_pred
-    self._predictions["rois"] = rois
-
-    return rois
 
   def _region_classification(self, fc7):
     cls_score = self.cls_score_net(fc7)
@@ -423,44 +400,14 @@ class Network(nn.Module):
     # build the anchors for the image
     self._anchor_component(net_conv.size(2), net_conv.size(3))
    
-    rois = self._region_proposal(net_conv)
-    if cfg.POOLING_MODE == 'crop':
-      pool5 = self._crop_pool_layer(net_conv, rois)
-    else:
-      pool5 = self._roi_pool_layer(net_conv, rois)
-
-    if self._mode == 'TRAIN':
-      torch.backends.cudnn.benchmark = True # benchmark because now the input size are fixed
-    fc7 = self._head_to_tail(pool5)
-
-    cls_prob, bbox_pred = self._region_classification(fc7)
-    
-    for k in self._predictions.keys():
-      self._score_summaries[k] = self._predictions[k]
-
-    return rois, cls_prob, bbox_pred
+    self._region_proposal(net_conv)
 
   def forward(self, image, im_info, gt_boxes=None, mode='TRAIN'):
-    self._image_gt_summaries['image'] = image
-    self._image_gt_summaries['gt_boxes'] = gt_boxes
-    self._image_gt_summaries['im_info'] = im_info
-
     self._image = Variable(torch.from_numpy(image.transpose([0,3,1,2])).cuda(), volatile=mode == 'TEST')
     self._im_info = im_info # No need to change; actually it can be an list
     self._gt_boxes = Variable(torch.from_numpy(gt_boxes).cuda()) if gt_boxes is not None else None
-
     self._mode = mode
-
-    rois, cls_prob, bbox_pred = self._predict()
-
-    if mode == 'TEST':
-      stds = bbox_pred.data.new(cfg.TRAIN.BBOX_NORMALIZE_STDS).repeat(self._num_classes).unsqueeze(0).expand_as(bbox_pred)
-      means = bbox_pred.data.new(cfg.TRAIN.BBOX_NORMALIZE_MEANS).repeat(self._num_classes).unsqueeze(0).expand_as(bbox_pred)
-      self._predictions["bbox_pred"] = bbox_pred.mul(Variable(stds)).add(Variable(means))
-    else:
-      if cfg.visualize_train:
-        visualize_train(bbox_pred, self._num_classes, self._predictions, self._im_info[2])
-      self._add_losses() # compute losses
+    self._predict()
 
   def init_weights(self):
     def normal_init(m, mean, stddev, truncated=False):
@@ -512,20 +459,6 @@ class Network(nn.Module):
 
   def train_step(self, blobs, train_op):
     self.forward(blobs['data'], blobs['im_info'], blobs['gt_boxes'])
-    rpn_loss_cls, rpn_loss_box, loss_cls, loss_box, loss = self._losses["rpn_cross_entropy"].data[0], \
-                                                                        self._losses['rpn_loss_box'].data[0], \
-                                                                        self._losses['cross_entropy'].data[0], \
-                                                                        self._losses['loss_box'].data[0], \
-                                                                        self._losses['total_loss'].data[0]
-    #utils.timer.timer.tic('backward')
-    train_op.zero_grad()
-    self._losses['total_loss'].backward()
-    #utils.timer.timer.toc('backward')
-    train_op.step()
-
-    self.delete_intermediate_states()
-
-    return rpn_loss_cls, rpn_loss_box, loss_cls, loss_box, loss
 
   def train_step_with_summary(self, blobs, train_op):
     self.forward(blobs['data'], blobs['im_info'], blobs['gt_boxes'])
