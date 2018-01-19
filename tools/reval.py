@@ -20,6 +20,10 @@ import pickle
 import os, sys, argparse
 import numpy as np
 
+# v3.2
+import global_var
+# v3.2
+
 
 def parse_args():
   """
@@ -68,6 +72,11 @@ def from_dets(imdb_name, output_dir, args):
 
 
 if __name__ == '__main__':
+
+  # v3.2
+  global_var.global_reval_version = 3.2
+  # v3.2
+
   args = parse_args()
 
   output_dir = os.path.abspath(args.output_dir[0])

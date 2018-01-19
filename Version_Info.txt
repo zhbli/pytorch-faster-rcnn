@@ -23,3 +23,12 @@ Usage: Run `reval.py`
 
 Change list:
 - [Modify_function] voc_eval
+
+# v3.2
+Save false_positives and missed_ground_truth.
+
+Change list:
+- [Add_file] global_var.py
+- [Modify_file] pascal_voc.py
+- [Modify_file] reval.py
+- [Add_function] voc_eval_v32

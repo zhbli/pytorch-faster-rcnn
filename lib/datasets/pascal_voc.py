@@ -18,8 +18,12 @@ import scipy.io as sio
 import pickle
 import subprocess
 import uuid
-from .voc_eval import voc_eval
+from .voc_eval import voc_eval, voc_eval_v32
 from model.config import cfg
+
+# v3.2
+import global_var
+# v3.2
 
 
 class pascal_voc(imdb):
@@ -187,8 +191,9 @@ class pascal_voc(imdb):
     comp_id = (self._comp_id + '_' + self._salt if self.config['use_salt']
                else self._comp_id)
 
-    # print('old file')
-    #comp_id = 'comp4_3a28dd7d-06b1-450e-8672-b49bcdd3f7aa'
+    if global_var.global_reval_version == 3.2:
+        print('old file')
+        comp_id = 'comp4_424a955d-0ebc-4f01-8383-7d790580f1ff'
 
     return comp_id
 
@@ -269,9 +274,18 @@ class pascal_voc(imdb):
         continue
       filename = self._get_voc_results_file_template().format(cls)
       filename_rois = self._get_voc_results_rois_file_template().format(cls)
-      rec, prec, ap = voc_eval(
-        filename, annopath, imagesetfile, cls, cachedir, ovthresh=0.5,
-        use_07_metric=use_07_metric, use_diff=self.config['use_diff'], roipath=filename_rois)
+
+      # v3.2
+      if global_var.global_reval_version == 3.2:
+          rec, prec, ap = voc_eval_v32(
+              filename, annopath, imagesetfile, cls, cachedir, ovthresh=0.5,
+              use_07_metric=use_07_metric, use_diff=self.config['use_diff'], roipath=filename_rois)
+      else:
+          rec, prec, ap = voc_eval(
+            filename, annopath, imagesetfile, cls, cachedir, ovthresh=0.5,
+            use_07_metric=use_07_metric, use_diff=self.config['use_diff'], roipath=filename_rois)
+      #v3.2
+
       aps += [ap]
       print(('AP for {} = {:.4f}'.format(cls, ap)))
       with open(os.path.join(output_dir, cls + '_pr.pkl'), 'wb') as f:
@@ -308,8 +322,14 @@ class pascal_voc(imdb):
 
   def evaluate_detections(self, all_boxes, output_dir, all_rois):
 
-    #print('donot write results files')
-    self._write_voc_results_file(all_boxes, all_rois)
+    # v3.2
+    if global_var.global_reval_version == 3.2:
+        print('donot write results files')
+    else:
+        self._write_voc_results_file(all_boxes, all_rois)
+    # v3.2
+    #self._write_voc_results_file(all_boxes, all_rois)
+
     self._do_python_eval(output_dir)
     if self.config['matlab_eval']:
       self._do_matlab_eval(output_dir)
