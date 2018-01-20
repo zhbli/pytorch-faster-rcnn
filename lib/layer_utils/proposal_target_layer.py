@@ -42,9 +42,10 @@ def proposal_target_layer(rpn_rois, rpn_scores, gt_boxes, _num_classes):
   rois_per_image = cfg.TRAIN.BATCH_SIZE / num_images
   fg_rois_per_image = int(round(cfg.TRAIN.FG_FRACTION * rois_per_image))
 
-  _sample_rois(
+  rois, labels = _sample_rois(
     all_rois, all_scores, gt_boxes, fg_rois_per_image,
     rois_per_image, _num_classes)
+  return rois, labels
 
 def _get_bbox_regression_labels(bbox_target_data, num_classes):
   """Bounding-box regression targets (bbox_target_data) are stored in a
@@ -146,9 +147,7 @@ def _sample_rois(all_rois, all_scores, gt_boxes, fg_rois_per_image, rois_per_ima
   bbox_targets, bbox_inside_weights = \
     _get_bbox_regression_labels(bbox_target_data, num_classes)
 
-  '''Visualize fg rois'''
-
-  '''end: Visualize fg rois'''
+  return rois, labels
 
 
 

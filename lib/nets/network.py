@@ -11,6 +11,7 @@ import math
 import numpy as np
 import cv2
 import matplotlib.pyplot as plt
+import os
 
 import torch
 import torch.nn as nn
@@ -155,13 +156,13 @@ class Network(nn.Module):
 
     return rpn_labels
 
-  def visualize_rois(self, rois, roi_scores, gt_boxes, is_flipped, img_name, width, scale):
+  def visualize_rois(self, rois, labels, gt_boxes, is_flipped, img_name, width, scale):
     # rois:       size = [256, 4]
     # roi_scores: scores of RPN
     # width:      width after scaled
-
-    do_visualize = input("1/0")
-    if do_visualize == '1':
+    img_id = img_name[-10:-4]
+    print('handling img {:s}'.format(img_id))
+    if 1:
         """Handle flip and scale"""
         if is_flipped == True:
           oldx1 = rois[:, 0].copy()
@@ -179,40 +180,21 @@ class Network(nn.Module):
         """Handle flip and scale"""
 
         im = cv2.imread(img_name)
-        im = im[:, :, (2, 1, 0)]
-
         for i in range(rois.shape[0]):
-            fig, ax = plt.subplots(figsize=(12, 12))
-            ax.imshow(im, aspect='equal')
-            roi = rois[i]
-            score = roi_scores[i]
-            ax.add_patch(
-                plt.Rectangle((roi[0], roi[1]),
-                              roi[2] - roi[0],
-                              roi[3] - roi[1], fill=False,
-                              edgecolor='red', linewidth=3.5)
-            )
-            ax.text(roi[0], roi[1] - 2,
-                    'PRN score is {:.3f}'.format(score),
-                    bbox=dict(facecolor='blue', alpha=0.5),
-                    fontsize=14, color='white')
-            for j in range(gt_boxes.shape[0]):
-                gt = gt_boxes[j]
-                ax.add_patch(
-                    plt.Rectangle((gt[0], gt[1]),
-                                  gt[2] - gt[0],
-                                  gt[3] - gt[1], fill=False,
-                                  edgecolor='green', linewidth=3.5)
-                )
-            plt.axis('off')
-            plt.tight_layout()
-            plt.draw()
-            #plt.show()
+            roi = rois[i].astype(np.int32)
+            roi_img = im[roi[1]:roi[3], roi[0]:roi[2], :]
+            label = int(labels[i])
+            if not os.path.exists('/data/zhbli/VOCdevkit/results/VOC2007/foreground_rois/{:d}'.format(label)):
+                os.makedirs('/data/zhbli/VOCdevkit/results/VOC2007/foreground_rois/{:d}'.format(label))
+            try:
+                cv2.imwrite('/data/zhbli/VOCdevkit/results/VOC2007/foreground_rois/{:d}/{:s}_{:d}.jpg'.format(label, img_id, i), roi_img)
+            except Exception as e:
+                print(e)
 
   def _proposal_target_layer(self, rois, roi_scores):
-      proposal_target_layer(
+      rois, labels = proposal_target_layer(
       rois, roi_scores, self._gt_boxes, self._num_classes)
-      self.visualize_rois(rois.data.cpu().numpy()[:, 1:], roi_scores.data.cpu().numpy(),
+      self.visualize_rois(rois.data.cpu().numpy()[:, 1:], labels.data.cpu().numpy(),
                           self._gt_boxes.data.cpu().numpy(), self.is_flipped, self.img_name, self._im_info[1],
                           self._im_info[2])
 
