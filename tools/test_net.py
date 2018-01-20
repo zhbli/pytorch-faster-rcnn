@@ -71,6 +71,11 @@ if __name__ == '__main__':
   print('Using config:')
   pprint.pprint(cfg)
 
+  # v4.0
+  if args.imdb_name != 'voc_2007_test':
+      input('constomed by zhbli')
+  # v4.0
+
   # if has model, get the name from it
   # if does not, then just use the initialization weights
   if args.model:
