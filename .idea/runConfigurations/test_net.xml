@@ -12,7 +12,7 @@
     <option name="ADD_SOURCE_ROOTS" value="true" />
     <module name="pytorch-faster-rcnn" />
     <option name="SCRIPT_NAME" value="$PROJECT_DIR$/tools/test_net.py" />
-    <option name="PARAMETERS" value="--imdb voc_2007_test --model output/vgg16/voc_2007_trainval/default/vgg16_faster_rcnn_iter_70000.pth --cfg experiments/cfgs/vgg16.yml --net vgg16 --set ANCHOR_SCALES [8,16,32] ANCHOR_RATIOS [0.5,1,2]" />
+    <option name="PARAMETERS" value="--imdb voc_2007_trainval --model output/vgg16/voc_2007_trainval/default/vgg16_faster_rcnn_iter_70000.pth --cfg experiments/cfgs/vgg16.yml --net vgg16 --set ANCHOR_SCALES [8,16,32] ANCHOR_RATIOS [0.5,1,2]" />
     <option name="SHOW_COMMAND_LINE" value="false" />
     <option name="EMULATE_TERMINAL" value="false" />
     <method />

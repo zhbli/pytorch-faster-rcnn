@@ -1,42 +1,16 @@
-# v2.0
-Visualize the box of error_detections before/after box_regression. It 证明证明证明demonstrates that box_regression won't make the error_localization problem worse.
+# v0.0
+Origin verion: master v4.0
 
-# v2.1
-Visualize 256 RoIs generated from function _sample_rois(...).
+# v1.0
+Save error detection.
+error detection means:
+1. all missed ground_truth
+2. false positive with score > 0.5
 
-# v2.2
-Visualize/Save error detection:
-- New file: save_error_detection.py
-
-# v3.0
-Save all detection results as images_with_bboxes.
-
-Usage: Run `reval.py`
-
-Change list:
-- [Modify_function] voc_eval
-
-# v3.1
-Save det_results in a better way.
-
-Usage: Run `reval.py`
-
-Change list:
-- [Modify_function] voc_eval
-
-# v3.2
-Save false_positives and missed_ground_truth.
-
-Change list:
-- [Add_file] global_var.py
-- [Modify_file] pascal_voc.py
-- [Modify_file] reval.py
-- [Add_function] voc_eval_v32
-
-# v4.0
-Get trainval detect result.
-
-Usage: Run `test_net.py --imdb voc_2007_trainval --model output/vgg16/voc_2007_trainval/default/vgg16_faster_rcnn_iter_70000.pth --cfg experiments/cfgs/vgg16.yml --net vgg16 --set ANCHOR_SCALES [8,16,32] ANCHOR_RATIOS [0.5,1,2]`
-
-Change list:
-- [Modify_flie] test_net.py
+Usage:
+1. voc_2007_trainval
+    Run reval.py /home/zhbli/pytorch-faster-rcnn/output/vgg16/voc_2007_trainval/default/vgg16_faster_rcnn_iter_70000
+    Set args.imdb_name = 'voc_2007_trainval' (in reval.py)
+2. voc_2007_test
+    Run reval.py /home/zhbli/pytorch-faster-rcnn/output/vgg16/voc_2007_test/default/vgg16_faster_rcnn_iter_70000
+    Set args.imdb_name = 'voc_2007_test' (in reval.py)

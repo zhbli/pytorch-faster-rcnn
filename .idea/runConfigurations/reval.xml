@@ -12,7 +12,7 @@
     <option name="ADD_SOURCE_ROOTS" value="true" />
     <module name="pytorch-faster-rcnn" />
     <option name="SCRIPT_NAME" value="$PROJECT_DIR$/tools/reval.py" />
-    <option name="PARAMETERS" value="$PROJECT_DIR$/output/vgg16/voc_2007_test/default/vgg16_faster_rcnn_iter_70000" />
+    <option name="PARAMETERS" value="$PROJECT_DIR$/output/vgg16/voc_2007_trainval/default/vgg16_faster_rcnn_iter_70000" />
     <option name="SHOW_COMMAND_LINE" value="false" />
     <option name="EMULATE_TERMINAL" value="false" />
     <method />

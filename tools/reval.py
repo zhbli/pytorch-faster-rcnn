@@ -72,12 +72,13 @@ def from_dets(imdb_name, output_dir, args):
 
 
 if __name__ == '__main__':
-
-  # v3.2
-  global_var.global_reval_version = 3.2
-  # v3.2
-
   args = parse_args()
+
+  args.imdb_name = 'voc_2007_trainval'
+  print('customed by zhbli')
+
+  #cfg.use_old_det_file = None
+  cfg.use_old_det_file = 'comp4_b4527b13-84f2-4952-8986-d5e817f3f010'
 
   output_dir = os.path.abspath(args.output_dir[0])
   imdb_name = args.imdb_name
